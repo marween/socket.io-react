@@ -10,6 +10,8 @@ var port = process.env.PORT || 8000; // connection heroku
  */
 let roomArray=[]
 let usersList = [];
+let playerOne ='';
+let playerTwo = '';
 
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -19,7 +21,7 @@ app.get('/', function(req, res){
 });
 
 io.on('connection', function (socket) {
-console.log('user connected');
+console.log('user connected ', socket.id);
   
   var loggedUser; // Utilisateur connecté a la socket
   let roomID;
@@ -42,25 +44,29 @@ console.log('user connected');
 
   socket.on('createRoom', function(data){
     socket.leave(roomID);
+    playerOne = data.user;
     roomID = data.roomName;
     console.log('[socket]','join room :',roomID);
     socket.join(roomID);
 
     if(roomArray.indexOf(roomID) === -1){roomArray.push(roomID)};
     console.log('array check', roomArray)
-    socket.emit('room-service', roomID);
+    socket.emit('room-service', [roomID, playerOne, playerTwo]);
     
   });
   /**
    * Réception de l'événement 'joinRoom-service' et réémission vers tous les utilisateurs
    */
   socket.on('joinRoom', function(data){
-      console.log('joinRoom', data)
+      
+      playerTwo = data.user;
+      console.log('joinRoom', data, playerOne, playerTwo)
     socket.leave(roomID);
+    
     roomID = data.roomName;
       console.log(roomID)
     socket.join(roomID)
-     socket.emit('room-service', roomID);
+     io.emit('room-service', [roomID, playerOne, playerTwo]);
       console.log('room clear')
     clientsInRoom = io.nsps['/'].adapter.rooms[roomID].length;
     
@@ -111,12 +117,15 @@ console.log('user connected');
    *****************************************
   */
 
-  socket.on('handleClick', function(data){
+  socket.on('handleClick', function(data, players){    
     console.log('handleClick', data);
-     io.emit('click', "coucou")
 
+    console.log('who', players)
+  });
+  socket.on('move', function(data){
+    console.log( 'move ', data);
 
-  }) 
+  })
   
   /**
    * Déconnexion d'un utilisateur : broadcast d'un 'service-message'
