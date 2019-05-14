@@ -2,8 +2,6 @@ import React, { Component } from 'react'
 import './index.css';
 import io from "socket.io-client";
 
-var socket;
-
 class Game extends Component{
   constructor(props){
     super(props);
@@ -18,8 +16,7 @@ class Game extends Component{
       colNames: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
      
     };
-    socket =io(this.state.endpoint);
-
+    this.socket = props.socket;
     const colNames = this.state.colNames;
     for(let row = 0; row < 8; row++){
       for(let col = 0; col < 8; col++){
@@ -44,28 +41,24 @@ class Game extends Component{
     this.setState({board: newBoard});
   } 
 
-/*  handleClick(id){
-    // socket.emit -> nom du socket.on coté serveur
-    id.preventDefault();
-     let choice = (id.currentTarget.id);
-     socket.emit('handleClick')
-     // else {
-     //   this.handleOccupied(choice)
-     // }
-} 
-*/
   handleClick(id){
     id.preventDefault();
-     let choice = id.currentTarget.id;
-     let players = [this.props.playerOne, this.props.playerTwo];
-     
-     socket.emit('handleClick', choice, players)
-     if(this.state.board[choice].content === ''){
-       this.handleEmpty(choice)
-     }
-     else {
-       this.handleOccupied(choice)
-     }
+    let choice = id.currentTarget.id;
+    let playerNumber = this.props.playerNumber;
+
+    console.log('emitting handleClick event to socket');
+    this.socket.emit('handleClick', {choice:choice, playerNumber:playerNumber})
+
+
+    this.socket.on('player1', (data)=>{
+      console.log('Player1 event', data, this.state.board);
+      if(this.state.board[data.choice].content === ''){
+        this.handleEmpty(data.choice)
+      }
+      else {
+        this.handleOccupied(data.choice)
+      }
+    })
   }
 
   handleEmpty(choice){
@@ -77,7 +70,7 @@ class Game extends Component{
       }
       let index = this.state.legalMove.indexOf(choice)
       if(index !== -1){
-        socket.emit("move", this.state.selected + choice);
+        this.socket.emit("move", this.state.selected + choice);
         let newBoard = {...this.state.board};
         this.state.legalMove.forEach(element => {newBoard[element].highlighted = false});
         this.setState({board: newBoard});
@@ -241,9 +234,6 @@ class Game extends Component{
     reds.forEach(pos => this.changePiece(pos, <div className="red checker"></div>, 'red', false));
     blues.forEach(pos => this.changePiece(pos, <div className="blue checker"></div>, 'blue', false));
 //-------------------------------------------------------------
-    socket.on('click', (data) =>{
-      this.setState({click: 'coucou'});
-    });
 }
   render(){
     console.log(this.state.board)

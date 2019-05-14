@@ -13,7 +13,6 @@ let usersList = [];
 let playerOne ='';
 let playerTwo = '';
 
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', function(req, res){
@@ -22,9 +21,12 @@ app.get('/', function(req, res){
 
 io.on('connection', function (socket) {
 console.log('user connected ', socket.id);
+
   
   var loggedUser; // Utilisateur connecté a la socket
   let roomID;
+  let playerNumber = false;
+
   /**
    * Connexion d'un utilisateur via le formulaire :
    *  - sauvegarde du user
@@ -32,7 +34,7 @@ console.log('user connected ', socket.id);
   socket.on('user-login', function (user) {
     loggedUser = user;
 
-    console.log('user connected : ' + loggedUser.username);
+    //console.log('user connected : ' + loggedUser.username);
     socket.emit('login', {userName: loggedUser.username});
     var message = {message: loggedUser.username + " joined the room"}
     socket.to(roomID).broadcast.emit('chat-message', message);
@@ -46,13 +48,25 @@ console.log('user connected ', socket.id);
     socket.leave(roomID);
     playerOne = data.user;
     roomID = data.roomName;
-    console.log('[socket]','join room :',roomID);
+    //console.log('[socket]','join room :',roomID);
     socket.join(roomID);
 
     if(roomArray.indexOf(roomID) === -1){roomArray.push(roomID)};
-    console.log('array check', roomArray)
+    //console.log('array check', roomArray)
+    console.log('playernumbuer before change',playerNumber)
+    playerNumber =true;
     socket.emit('room-service', [roomID, playerOne, playerTwo]);
-    
+    socket.emit('playerNumber', playerNumber);
+    console.log('player',playerNumber)
+
+    console.log('registering click handler for creator');
+    socket.on('handleClick', function(data, players){    
+      //console.log('handleClick', data);
+
+      console.log('who', loggedUser ,playerNumber)
+      socket.emit('player1', {playerNumber: playerNumber, choice: data.choice})
+    });
+
   });
   /**
    * Réception de l'événement 'joinRoom-service' et réémission vers tous les utilisateurs
@@ -67,15 +81,24 @@ console.log('user connected ', socket.id);
       console.log(roomID)
     socket.join(roomID)
      io.emit('room-service', [roomID, playerOne, playerTwo]);
-      console.log('room clear')
+     socket.emit('playerNumber', playerNumber)
+      console.log('playerNumber')
     clientsInRoom = io.nsps['/'].adapter.rooms[roomID].length;
     
     if(clientsInRoom === 2){ 
-      roomArray.splice(roomArray.indexOf(roomID),1)
-        console.log('room complet')
-      }
+    roomArray.splice(roomArray.indexOf(roomID),1)
+      //console.log('room complet')
     }
-  );
+
+    console.log('registering click handler for joiner');
+    socket.on('handleClick', function(data, players){    
+      //console.log('handleClick', data);
+
+      console.log('who', loggedUser ,playerNumber)
+      socket.emit('player1', {playerNumber: playerNumber, choice: data.choice})
+    });
+
+  });
   
 
   /**
@@ -88,7 +111,7 @@ console.log('user connected ', socket.id);
     if(clientsInRoom >1){ 
       if(roomArray.indexOf(roomID) === -1)  {
         roomArray.push(roomID)
-        console.log('room un place')
+        
       }
     }
 
@@ -105,8 +128,8 @@ console.log('user connected ', socket.id);
    * Réception de l'événement 'chat-message' et réémission vers tous les utilisateurs
    */
   socket.on('chat-message', function (message) {
-    console.log('chat-message', message);
-    console.log('roomID', roomID);
+    //console.log('chat-message', message);
+    //console.log('roomID', roomID);
     message.username = loggedUser.username + " says : ";
     io.to(roomID).emit('chat-message', message);
    
@@ -117,11 +140,8 @@ console.log('user connected ', socket.id);
    *****************************************
   */
 
-  socket.on('handleClick', function(data, players){    
-    console.log('handleClick', data);
+  
 
-    console.log('who', players)
-  });
   socket.on('move', function(data){
     console.log( 'move ', data);
 
