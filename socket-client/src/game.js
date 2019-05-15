@@ -46,7 +46,7 @@ class Game extends Component{
     let choice = id.currentTarget.id;
     let playerNumber = this.props.playerNumber;
 
-    console.log('emitting handleClick event to socket');
+    // console.log('emitting handleClick event to socket');
     this.socket.emit('handleClick', {choice:choice, playerNumber:playerNumber})
 
 
