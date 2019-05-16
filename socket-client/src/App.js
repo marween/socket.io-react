@@ -99,7 +99,7 @@ class Chat extends Component{
         { this.state.session ?
           <div>
            {  !this.state.room_check ?
-            <div>
+            <div className="room">
               
               <section className="chat">
                   {this.state.rooms.map(item => {
@@ -112,7 +112,7 @@ class Chat extends Component{
                     )}
                   )}
               </section>
-              
+              <h5>Hello {this.state.username}</h5>
               <form>
                 <input
                   className="m"
@@ -121,29 +121,31 @@ class Chat extends Component{
                   onChange={ev => this.setState({room: ev.target.value})}/> 
                 <button onClick={this.createRoom}>Create room</button>
               </form>
-              <h5>Hello {this.state.username}</h5>
+              
             </div>
             :
             <div>
-              <div>
-                <h3>{this.state.room}</h3>
-                <button onClick={() => this.leaveRoom(this.state.room)}>Leave room</button>
-              </div>
-              <form action="">
-                <input
-                  className="m"
-                  autoComplete="off"
-                  value={this.state.message}
-                  onChange={ev => this.setState({message: ev.target.value})}/> 
-                <button onClick={this.sendMessage}>Send</button>
-              </form>
-              <section className="chat">
-                {this.state.messages.map(msg => {
-                  return (
-                    <p>{msg.username} {msg.message}</p>
+              <div className="chat_room">
+                <div>
+                  <h3 className='roomName'> chat room name :{this.state.room}</h3>
+                  <button onClick={() => this.leaveRoom(this.state.room)}>Leave room</button>
+                </div>
+                <form action="">
+                  <input
+                    className="m"
+                    autoComplete="off"
+                    value={this.state.message}
+                    onChange={ev => this.setState({message: ev.target.value})}/> 
+                  <button onClick={this.sendMessage}>Send</button>
+                </form>
+                <section className="chat">
+                  {this.state.messages.map(msg => {
+                    return (
+                      <p>{msg.username} {msg.message}</p>
+                    )}
                   )}
-                )}
-              </section>
+                </section>
+              </div>
               <Game
                 playerOne = {this.state.playerOne}
                 playerTwo = {this.state.playerTwo}
