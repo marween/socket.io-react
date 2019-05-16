@@ -34,7 +34,9 @@ for(let i = 0; i < 8; i++){
   }
 }
 
-let colNames= ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+let colNames= ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+let turn = 'white';
+let plusieurs_prises = [];
 /*
 * fonctions jeu des dames----------------------------------
 *-----------------------------------------------------------
@@ -170,42 +172,56 @@ app.use(express.static(path.join(__dirname, 'public')));
 
     // jeu de dame -> mouvement
     socket.on('move', function(data){
-      let column_origin = colNames.indexOf(data.playerMove.substring(0, 1));
-      let row_origin = data.playerMove.substring(1, 2) - 1;
-      
-      if(verifpiece(data)){
-        let column_dest = colNames.indexOf(data.playerMove.substring(2, 3));
-        let row_dest = data.playerMove.substring(3, 4) - 1;
-        let obligedMoves = [];
+      if (turn == 'white') {
+        let column_origin = colNames.indexOf(data.playerMove.substring(0, 1));
+        let row_origin = data.playerMove.substring(1, 2) - 1;
+        
+        if(verifpiece(data)){
+          let column_dest = colNames.indexOf(data.playerMove.substring(2, 3));
+          let row_dest = data.playerMove.substring(3, 4) - 1;
+          let obligedMoves = [];
 
-        for(let i = 0; i < 8; i++){
-          for(let j = 0; j < 8; j++){
-            if(board[i][j].includes('white'))
-              obligedMoves = mandatoryMoves(row_origin, column_origin, 'white', board[row_origin][column_origin].includes('queen'))
+          for(let i = 0; i < 8; i++){
+            for(let j = 0; j < 8; j++){
+              if(board[i][j].includes('white'))
+                obligedMoves = mandatoryMoves(row_origin, column_origin, 'white', board[row_origin][column_origin].includes('queen'))
+            }
           }
-        }
-        if((obligedMoves.length === 0) || (obligedMoves.indexOf(data.playerMove.substring(2, 4)) !== -1)) {
+          if((obligedMoves.length === 0) || (obligedMoves.indexOf(data.playerMove.substring(2, 4)) !== -1) && ((plusieurs_prises.length === 0) || (plusieurs_prises.indexOf(data.playerMove) !== -1))) {
+            plusieurs_prises = [];
 
-
-          if(possibleMoves(row_origin, column_origin, 'white', board[row_origin][column_origin].includes('queen')).indexOf(data.playerMove.substring(2, 4) !== -1)){
+            if(possibleMoves(row_origin, column_origin, 'white', board[row_origin][column_origin].includes('queen')).indexOf(data.playerMove.substring(2, 4) !== -1)){
+              
+              board[row_dest][column_dest] = board[row_origin][column_origin];
+              board[row_origin][column_origin] = '';
             
-            board[row_dest][column_dest] = board[row_origin][column_origin];
-            board[row_origin][column_origin] = '';
-          
-            if (Math.abs(row_origin - row_dest) > 1) {
-                board[(row_origin + row_dest) / 2][(column_origin + column_dest) / 2] = '';
+              if (Math.abs(row_origin - row_dest) > 1) {
+                  board[(row_origin + row_dest) / 2][(column_origin + column_dest) / 2] = '';
+                  let obligedMoves = mandatoryMoves(row_dest, column_dest, 'white', board[row_dest][column_dest].includes('queen'))
+                  if(obligedMoves.length > 0) {
+                    io.to(roomID).emit('move', data)
+                    for(let i = 0; i < obligedMoves.length; i++) {
+                      plusieurs_prises.push(data.playerMove.substring(2, 4) + obligedMoves[i]);
+                      if(gameOver('black') === true){
+                        console.log('Jamal a gagné');
+                        io.to(roomID).emit('gameOver', 'white won')  
+                      }
+                      return;
+                    }
+                  }
+
+              }
+              io.to(roomID).emit('move', data);
+              turn = 'black';
+
+              
+
+              
+
             }
-            io.to(roomID).emit('move', data);
-
-            if(gameOver('black') === true){
-              console.log('Jamal a gagné');
-            }
-
-            io.to(roomID).emit('gameOver', 'white won')  
-
           }
         }
-       }
+     }
     })
    
   });
@@ -236,32 +252,56 @@ app.use(express.static(path.join(__dirname, 'public')));
 
     // jeu de dame -> mouvement joueur 2
     socket.on('move', function(data){
-      let column_origin = colNames.indexOf(data.playerMove.substring(0, 1));
-      let row_origin = data.playerMove.substring(1, 2) - 1;
-      
-      if(verifpiece(data)){
-        let column_dest = colNames.indexOf(data.playerMove.substring(2, 3));
-        let row_dest = data.playerMove.substring(3, 4) - 1;
-        let obligedMoves = [];
+      if(turn == 'black') {
+        let column_origin = colNames.indexOf(data.playerMove.substring(0, 1));
+        let row_origin = data.playerMove.substring(1, 2) - 1;
+        
+        if(verifpiece(data)){
+          let column_dest = colNames.indexOf(data.playerMove.substring(2, 3));
+          let row_dest = data.playerMove.substring(3, 4) - 1;
+          let obligedMoves = [];
 
-        for(let i = 0; i < 8; i++){
-          for(let j = 0; j < 8; j++){
-            if(board[i][j].includes('black'))
-             obligedMoves = mandatoryMoves(row_origin, column_origin, 'black', board[row_origin][column_origin].includes('queen'))
-          }
-        }
-        if((obligedMoves.length === 0) || (obligedMoves.indexOf(data.playerMove.substring(2, 4)) !== -1)){
-          
-          if(possibleMoves(row_origin, column_origin, 'black', board[row_origin][column_origin].includes('queen')).indexOf(data.playerMove.substring(2, 4) !== -1)){
-            
-            console.log('possibleMoves',possibleMoves(row_origin, column_origin, 'black', board[row_origin][column_origin].includes('queen')))
-            board[row_dest][column_dest] = board[row_origin][column_origin];
-            board[row_origin][column_origin] = '';
-          
-            if (Math.abs(row_origin - row_dest) > 1) {
-                board[(row_origin + row_dest) / 2][(column_origin + column_dest) / 2] = '';
+          for(let i = 0; i < 8; i++){
+            for(let j = 0; j < 8; j++){
+              if(board[i][j].includes('black'))
+               obligedMoves = mandatoryMoves(row_origin, column_origin, 'black', board[row_origin][column_origin].includes('queen'))
             }
-            io.to(roomID).emit('move', data);
+          }
+          if((obligedMoves.length === 0) || (obligedMoves.indexOf(data.playerMove.substring(2, 4)) !== -1)&& ((plusieurs_prises.length === 0) || (plusieurs_prises.indexOf(data.playerMove) !== -1))){
+            
+            plusieurs_prises = [];
+
+            if(possibleMoves(row_origin, column_origin, 'black', board[row_origin][column_origin].includes('queen')).indexOf(data.playerMove.substring(2, 4) !== -1)){
+              
+              console.log('possibleMoves',possibleMoves(row_origin, column_origin, 'black', board[row_origin][column_origin].includes('queen')))
+              board[row_dest][column_dest] = board[row_origin][column_origin];
+              board[row_origin][column_origin] = '';
+              
+              if (Math.abs(row_origin - row_dest) > 1) {
+                  board[(row_origin + row_dest) / 2][(column_origin + column_dest) / 2] = '';
+                  let obligedMoves = mandatoryMoves(row_dest, column_dest, 'black', board[row_dest][column_dest].includes('queen'))
+                  if(obligedMoves.length > 0) {
+                    io.to(roomID).emit('move', data)
+                    for(let i = 0; i < obligedMoves.length; i++) {
+                      plusieurs_prises.push(data.playerMove.substring(2, 4) + obligedMoves[i]);
+                      if(gameOver('white') === true){
+                        console.log('Jamal a gagné');
+                        io.to(roomID).emit('gameOver', 'black won')
+                      }
+                      return;
+                    }
+                  }
+
+              }
+              io.to(roomID).emit('move', data);
+              turn = 'white';
+              if(gameOver('white') === true){
+                console.log('Jamal a gagné');
+                io.to(roomID).emit('gameOver', 'black won')
+              }
+
+              
+            }
           }
         }
       }

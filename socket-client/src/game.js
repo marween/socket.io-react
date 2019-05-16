@@ -232,7 +232,7 @@ class Game extends Component{
         this.setState({selected: ''});
       });
       this.socket.on('gameOver', data =>{
-
+        console.log(data);
       })
 
 //-------------------------------------------------------------
