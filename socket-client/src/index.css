@@ -61,12 +61,12 @@ h1{
     }
 
     .red-queen {
-     /* background-image: url(../assets/pawn_red_queen.png);*/
+      background-image: url(./assets/blackQueen.png);
       background-size: cover;
       background-position: bottom;
     }
     .blue-queen {
-      /*background-image: url(../assets/pawn_blue_queen.png);*/
+      background-image: url(./assets/whiteQueen.png);
       background-size: cover;
       background-position: bottom;
 }

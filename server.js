@@ -6,7 +6,7 @@ var path = require ('path');
 var port = process.env.PORT || 8000; // connection heroku
 
 /**
- * Gestion des requêtes HTTP des utilisateurs en leur renvoyant les fichiers du dossier 'public'
+ * variables globales
  */
  let roomArray=[]
  let usersList = [];
@@ -35,8 +35,12 @@ for(let i = 0; i < 8; i++){
 }
 
 let colNames= ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+/*
+* fonctions jeu des dames----------------------------------
+*-----------------------------------------------------------
+*/
 
-function moveIt(data) {
+function verifpiece(data) {
   let column_origin = colNames.indexOf(data.playerMove.substring(0, 1));
   let row_origin = data.playerMove.substring(1, 2) - 1;
   if((data.playerNumber && board[row_origin][column_origin].includes('white')) || (!data.playerNumber && board[row_origin][column_origin].includes('black')))
@@ -86,6 +90,25 @@ function possibleMoves(row, column, color, isQueen) {
   return legalMove;
 }
 
+function mandatoryMoves(row, column, color, isQueen) {
+
+  let obligedMoves = [];
+
+  if((column > 1) && (row < 6) && (color === 'black' || isQueen) && (board[row + 1][column - 1] !== '') && (board[row + 1][column - 1].split(' ', 1)[0] !== color) && (board[row + 2][column - 2] === ''))
+    obligedMoves.push(colNames[column - 2] + (row + 3));
+
+  if((column < 6) && (row < 6) && (color === 'black' || isQueen) && (board[row + 1][column + 1] !== '') && (board[row + 1][column + 1].split(' ', 1)[0] !== color) && (board[row + 2][column + 2] === ''))
+    obligedMoves.push(colNames[column + 2] + (row + 3));
+
+  if((column > 1) && (row > 1) && (color === 'white' || isQueen) && (board[row - 1][column - 1] !== '') && (board[row - 1][column - 1].split(' ', 1)[0] !== color) && (board[row - 2][column - 2] === ''))
+    obligedMoves.push(colNames[column - 2] + (row - 1));
+
+  if((column < 6) && (row > 1) && (color === 'white' || isQueen) && (board[row - 1][column + 1] !== '') && (board[row - 1][column + 1].split(' ', 1)[0] !== color) && (board[row - 2][column + 2] === ''))
+    obligedMoves.push(colNames[column + 2] + (row - 1));
+
+  return obligedMoves;
+}
+
 app.use(express.static(path.join(__dirname, 'public')));
  app.get('/', function(req, res){
   res.sendFile(__dirname + '/socket-client/public/index.html');
@@ -114,16 +137,17 @@ app.use(express.static(path.join(__dirname, 'public')));
     io.emit('room-list', roomArray)
   });
    /**
-   * Réception de l'événement 'room-service' et réémission vers tous les utilisateurs
+   * Réception de l'événement 'room-service' et 'move' 
+   * et réémission vers tous les utilisateurs connectés à la room
    */
    socket.on('createRoom', function(data){
-    socket.leave(roomID);
-    playerOne = data.user;
-    roomID = data.roomName;
+    socket.leave(roomID); // on quitte une room
+    playerOne = data.user; // premier connecté = premier joueur
+    roomID = data.roomName; // nom de la room
     //console.log('[socket]','join room :',roomID);
     socket.join(roomID);
 
-    if(roomArray.indexOf(roomID) === -1){roomArray.push(roomID)};
+    if(roomArray.indexOf(roomID) === -1){roomArray.push(roomID)}; // compte le nombre de joueurs à la room
     //console.log('array check', roomArray)
     // console.log('playerNumber before change',playerNumber)
     playerNumber =true;
@@ -133,30 +157,47 @@ app.use(express.static(path.join(__dirname, 'public')));
     socket.emit('playerNumber', playerNumber);
     console.log('player',playerNumber)
 
+    // jeu de dame -> mouvement
     socket.on('move', function(data){
       let column_origin = colNames.indexOf(data.playerMove.substring(0, 1));
       let row_origin = data.playerMove.substring(1, 2) - 1;
-      if(moveIt(data)){
+      
+      if(verifpiece(data)){
         let column_dest = colNames.indexOf(data.playerMove.substring(2, 3));
         let row_dest = data.playerMove.substring(3, 4) - 1;
-        
-        board[row_dest][column_dest] = board[row_origin][column_origin];
-        
-        board[row_origin][column_origin] = '';
-        
-        if (Math.abs(row_origin - row_dest) > 1) {
-            board[(row_origin + row_dest) / 2][(column_origin + column_dest) / 2] = '';
+        let obligedMoves = [];
+
+        for(let i = 0; i < 8; i++){
+          for(let j = 0; j < 8; j++){
+            if(board[i][j].includes('white'))
+              obligedMoves = mandatoryMoves(row_origin, column_origin, 'white', board[row_origin][column_origin].includes('queen'))
           }
-        io.to(roomID).emit('move', data);
-      }
-      
+        }
+        if((obligedMoves.length === 0) || (obligedMoves.indexOf(data.playerMove.substring(2, 4)) !== -1)) {
+
+
+          if(possibleMoves(row_origin, column_origin, 'white', board[row_origin][column_origin].includes('queen')).indexOf(data.playerMove.substring(2, 4) !== -1)){
+            
+            board[row_dest][column_dest] = board[row_origin][column_origin];
+            board[row_origin][column_origin] = '';
+          
+            if (Math.abs(row_origin - row_dest) > 1) {
+                board[(row_origin + row_dest) / 2][(column_origin + column_dest) / 2] = '';
+            }
+            io.to(roomID).emit('move', data);
+          }
+        }
+       }
     })
    
   });
+
   /**
-   * Réception de l'événement 'joinRoom-service' et réémission vers tous les utilisateurs
+   * Réception de l'événement 'joinRoom-service' et 'move' 
+   * et réémission vers tous les utilisateurs connectés à la room
    */
    socket.on('joinRoom', function(data){
+    // joueur qui rejoint la room = joueur 2
     playerTwo = data.user;
       // console.log('joinRoom', data, playerOne, playerTwo)
     socket.leave(roomID);
@@ -175,28 +216,41 @@ app.use(express.static(path.join(__dirname, 'public')));
       //console.log('room complet')
     }
 
+    // jeu de dame -> mouvement joueur 2
     socket.on('move', function(data){
       let column_origin = colNames.indexOf(data.playerMove.substring(0, 1));
       let row_origin = data.playerMove.substring(1, 2) - 1;
       
-      if(moveIt(data)){
+      if(verifpiece(data)){
         let column_dest = colNames.indexOf(data.playerMove.substring(2, 3));
         let row_dest = data.playerMove.substring(3, 4) - 1;
-        
-        board[row_dest][column_dest] = board[row_origin][column_origin];
-        
-        board[row_origin][column_origin] = '';
-        
-        if (Math.abs(row_origin - row_dest) > 1) {
-            board[(row_origin + row_dest) / 2][(column_origin + column_dest) / 2] = '';
+        let obligedMoves = [];
+
+        for(let i = 0; i < 8; i++){
+          for(let j = 0; j < 8; j++){
+            if(board[i][j].includes('black'))
+             obligedMoves = mandatoryMoves(row_origin, column_origin, 'black', board[row_origin][column_origin].includes('queen'))
           }
-        
-        io.to(roomID).emit('move', data);
+        }
+        if((obligedMoves.length === 0) || (obligedMoves.indexOf(data.playerMove.substring(2, 4)) !== -1)){
+          
+          if(possibleMoves(row_origin, column_origin, 'black', board[row_origin][column_origin].includes('queen')).indexOf(data.playerMove.substring(2, 4) !== -1)){
+            
+            console.log('possibleMoves',possibleMoves(row_origin, column_origin, 'black', board[row_origin][column_origin].includes('queen')))
+            board[row_dest][column_dest] = board[row_origin][column_origin];
+            board[row_origin][column_origin] = '';
+          
+            if (Math.abs(row_origin - row_dest) > 1) {
+                board[(row_origin + row_dest) / 2][(column_origin + column_dest) / 2] = '';
+            }
+            io.to(roomID).emit('move', data);
+          }
+        }
       }
-      
     })
 
   });
+
   /**
    * Réception de l'événement 'romm-list' et réémission vers tous les utilisateurs
    */

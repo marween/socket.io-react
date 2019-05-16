@@ -95,12 +95,7 @@ class Chat extends Component{
 
     return (
 
-      <>     
-        <Game
-          playerOne = {this.state.playerOne}
-          playerTwo = {this.state.playerTwo}
-          playerNumber = {this.state.playerNumber}
-          socket={socket}/>   
+      <> 
         { this.state.session ?
           <div>
            {  !this.state.room_check ?
@@ -149,6 +144,12 @@ class Chat extends Component{
                   )}
                 )}
               </section>
+              <Game
+                playerOne = {this.state.playerOne}
+                playerTwo = {this.state.playerTwo}
+                playerNumber = {this.state.playerNumber}
+                socket={socket}
+              />  
             </div>
           }
           </div>
@@ -165,7 +166,6 @@ class Chat extends Component{
             </form>
           </section>
         }
-         
       </>
     );
   }

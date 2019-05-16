@@ -51,7 +51,6 @@ class Game extends Component{
     else {
       this.handleOccupied(choice)
     }
-    // })
   }
 
   handleEmpty(choice){
