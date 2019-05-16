@@ -109,6 +109,17 @@ function mandatoryMoves(row, column, color, isQueen) {
   return obligedMoves;
 }
 
+function gameOver(player) {
+  for(let i = 0; i < 8; i++){
+    for(let j = 0; j < 8; j++){
+      if(board[i][j].includes(player) && possibleMoves(i, j, player, board[i][j].includes('queen')).length !== 0)
+        return false;
+    }
+  }
+  return true;
+}
+
+
 app.use(express.static(path.join(__dirname, 'public')));
  app.get('/', function(req, res){
   res.sendFile(__dirname + '/socket-client/public/index.html');
@@ -185,6 +196,13 @@ app.use(express.static(path.join(__dirname, 'public')));
                 board[(row_origin + row_dest) / 2][(column_origin + column_dest) / 2] = '';
             }
             io.to(roomID).emit('move', data);
+
+            if(gameOver('black') === true){
+              console.log('Jamal a gagné');
+            }
+
+            io.to(roomID).emit('gameOver', 'white won')  
+
           }
         }
        }
