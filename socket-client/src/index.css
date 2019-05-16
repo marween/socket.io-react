@@ -12,17 +12,24 @@ body{
   width:50%;
   text-align: center;
 }
+<<<<<<< HEAD
 .room .chat{
   margin-top: 50%;
 }
 .login .title{
+=======
+.login form, .room .chat{
+>>>>>>> dev
   margin-top: 50%;
 }
 .roomName {
   display: inline-block;
   margin-right: 5%;
   margin-bottom: 5%;
+<<<<<<< HEAD
   color:#eee;
+=======
+>>>>>>> dev
 }
 .chat_room{
   float: right;
@@ -32,12 +39,17 @@ body{
   min-height: 80vh;
   margin-right: 5%;
 }
+<<<<<<< HEAD
 #sendMessage{
   position: fixed;
   bottom:0;
 }
 .title, h2{
   color:rgb(200,0,0);
+=======
+.title{
+  color:yellow;
+>>>>>>> dev
   text-align:center;
   margin-bottom: 2%;
   margin-top:5%;
@@ -60,6 +72,7 @@ label{
 button{
   background: rgba(81,8,16,0.8);
   padding:2%; 
+<<<<<<< HEAD
   color:#ddd;
 }
 .chat p{
@@ -71,6 +84,11 @@ button{
 .chat p span{
   color:rgb(200,0,0);
 }
+=======
+}
+
+
+>>>>>>> dev
 #checker-board {
   height: 43rem;
   width: 43rem;
@@ -81,6 +99,7 @@ button{
 }
 #mainboard{
   max-width: 43rem;
+  margin-left:5%;
 }
 
 .square {
@@ -137,4 +156,16 @@ button{
   background-size: cover;
   background-position: bottom;
 
+<<<<<<< HEAD
+=======
+    .red-queen {
+      background-image: url(./assets/blackQueen.png);
+      background-size: cover;
+      background-position: bottom;
+    }
+    .blue-queen {
+      background-image: url(./assets/whiteQueen.png);
+      background-size: cover;
+      background-position: bottom;
+>>>>>>> dev
 }
