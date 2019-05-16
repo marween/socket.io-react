@@ -231,8 +231,8 @@ class Game extends Component{
         this.setState({mandatory: []});
         this.setState({selected: ''});
       });
-      socket.on('gameOver', data =>{
-        
+      this.socket.on('gameOver', data =>{
+
       })
 
 //-------------------------------------------------------------
