@@ -104,10 +104,17 @@ console.log('user connected ', socket.id);
    /**
    * Réception de l'événement 'chat-message' et réémission vers tous les utilisateurs
    */
+<<<<<<< Updated upstream
   socket.on('chat-message', function (message) {
     console.log('chat-message', message);
     console.log('roomID', roomID);
     message.username = loggedUser.username + " says : ";
+=======
+   socket.on('chat-message', function (message) {
+    //console.log('chat-message', message);
+    //console.log('roomID', roomID);
+    message.username = loggedUser.username + ' : ';
+>>>>>>> Stashed changes
     io.to(roomID).emit('chat-message', message);
    
   });

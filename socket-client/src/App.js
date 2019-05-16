@@ -23,7 +23,8 @@ class Chat extends Component{
       rooms:[], //ensemble des rooms existantes reçues du serveur
       room_check: false, //boolean pour switch l'opérateur ternaire
       playerOne:'',
-      playerTwo:''
+      playerTwo:'', 
+      playerNumber: ''
     };
     socket = io(this.state.endpoint);
   }  
@@ -78,6 +79,10 @@ class Chat extends Component{
       this.setState({room: data[0], playerOne: data[1], playerTwo: data[2]});
     });
 
+    socket.on('playerNumber', (data) =>{
+      this.setState({playerNumber: data})
+    })
+
     socket.on('room-list', (data) => {
       this.setState({rooms: data});
       console.log("state room : ", this.state.rooms);
@@ -86,17 +91,15 @@ class Chat extends Component{
   }
   render(){
     // console.log(this.state);
-    console.log('player1 ' + this.state.playerOne)
+    console.log('playerone ' + this.state.playerOne)
+
     return (
 
-      <>     
-        <Game
-          playerOne = {this.state.playerOne}
-          playerTwo = {this.state.playerTwo}/>   
+      <> 
         { this.state.session ?
           <div>
            {  !this.state.room_check ?
-            <div>
+            <div className="room">
               
               <section className="chat">
                   {this.state.rooms.map(item => {
@@ -109,7 +112,7 @@ class Chat extends Component{
                     )}
                   )}
               </section>
-              
+              <h5>Hello {this.state.username}</h5>
               <form>
                 <input
                   className="m"
@@ -118,29 +121,37 @@ class Chat extends Component{
                   onChange={ev => this.setState({room: ev.target.value})}/> 
                 <button onClick={this.createRoom}>Create room</button>
               </form>
-              <h5>Hello {this.state.username}</h5>
+              
             </div>
             :
             <div>
-              <div>
-                <h3>{this.state.room}</h3>
-                <button onClick={() => this.leaveRoom(this.state.room)}>Leave room</button>
-              </div>
-              <form action="">
-                <input
-                  className="m"
-                  autoComplete="off"
-                  value={this.state.message}
-                  onChange={ev => this.setState({message: ev.target.value})}/> 
-                <button onClick={this.sendMessage}>Send</button>
-              </form>
-              <section className="chat">
-                {this.state.messages.map(msg => {
-                  return (
-                    <p>{msg.username} {msg.message}</p>
+              <div className="chat_room">
+                <div>
+                  <h3 className='roomName'> chat room name :{this.state.room}</h3>
+                  <button onClick={() => this.leaveRoom(this.state.room)}>Leave room</button>
+                </div>
+                <form action="">
+                  <input
+                    className="m"
+                    autoComplete="off"
+                    value={this.state.message}
+                    onChange={ev => this.setState({message: ev.target.value})}/> 
+                  <button onClick={this.sendMessage}>Send</button>
+                </form>
+                <section className="chat">
+                  {this.state.messages.map(msg => {
+                    return (
+                      <p>{msg.username} {msg.message}</p>
+                    )}
                   )}
-                )}
-              </section>
+                </section>
+              </div>
+              <Game
+                playerOne = {this.state.playerOne}
+                playerTwo = {this.state.playerTwo}
+                playerNumber = {this.state.playerNumber}
+                socket={socket}
+              />  
             </div>
           }
           </div>
@@ -157,12 +168,10 @@ class Chat extends Component{
             </form>
           </section>
         }
-         
       </>
     );
   }
 }
 export default Chat;
-
 
 
