@@ -118,6 +118,7 @@ class Chat extends Component{
                   className="m"
                   autoComplete="off"
                   value={this.state.room}
+                  autoFocus
                   onChange={ev => this.setState({room: ev.target.value})}/> 
                 <button onClick={this.createRoom}>Create room</button>
               </form>
@@ -127,17 +128,10 @@ class Chat extends Component{
             <div>
               <div className="chat_room">
                 <div>
-                  <h3 className='roomName'> chat room name :{this.state.room}</h3>
+                  <h3 className='roomName'>{this.state.room}</h3>
                   <button onClick={() => this.leaveRoom(this.state.room)}>Leave room</button>
                 </div>
-                <form action="">
-                  <input
-                    className="m"
-                    autoComplete="off"
-                    value={this.state.message}
-                    onChange={ev => this.setState({message: ev.target.value})}/> 
-                  <button onClick={this.sendMessage}>Send</button>
-                </form>
+                
                 <section className="chat">
                   {this.state.messages.map(msg => {
                     return (
@@ -145,6 +139,14 @@ class Chat extends Component{
                     )}
                   )}
                 </section>
+                <form action="" id='sendMessage'>
+                  <input
+                    className="m"
+                    autoComplete="off"
+                    value={this.state.message}
+                    onChange={ev => this.setState({message: ev.target.value})}/> 
+                  <button onClick={this.sendMessage}>Send</button>
+                </form>
               </div>
               <Game
                 playerOne = {this.state.playerOne}
@@ -157,8 +159,9 @@ class Chat extends Component{
           </div>
           :
            <section className="login">
+            <h1 className="title">Piece Checkers</h1>
             <form action="">
-              <label htmlFor="u">Username </label>
+              {/*<label htmlFor="u">Username </label>*/}
               <input
                 className="u" 
                 onChange={ev => this.setState({username: ev.target.value})}

@@ -11,7 +11,7 @@ var port = process.env.PORT || 8000; // connection heroku
  let roomArray=[]
  let usersList = [];
  let playerOne ='';
- let playerTwo = '';
+ let playerTwo = 'waiting player 2';
 
 let board = new Array(8);
 
@@ -298,7 +298,7 @@ app.use(express.static(path.join(__dirname, 'public')));
    socket.on('chat-message', function (message) {
     //console.log('chat-message', message);
     //console.log('roomID', roomID);
-    message.username = loggedUser.username + " says : ";
+    message.username = loggedUser.username + " : ";
     io.to(roomID).emit('chat-message', message);
 
   });

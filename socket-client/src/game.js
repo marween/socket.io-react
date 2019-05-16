@@ -231,9 +231,9 @@ class Game extends Component{
         this.setState({mandatory: []});
         this.setState({selected: ''});
       });
-      socket.on('gameOver', data =>{
+      /*socket.on('gameOver', data =>{
         
-      })
+      })*/
 
 //-------------------------------------------------------------
 }
@@ -246,11 +246,8 @@ render(){
     className="col align-self-center" 
     id="mainboard">
     <h1 className='title'> 
-      Mon jeu de dames 
-    </h1>
-    <p className="vs">
-     {this.props.playerOne} vs {this.props.playerTwo}</p>
-    
+      {this.props.playerOne} vs {this.props.playerTwo}
+    </h1>    
     <div id="checker-board">
     {Object.keys(this.state.board).map(key => {
       let square = this.state.board[key];
