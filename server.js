@@ -5,6 +5,9 @@ var io = require('socket.io')(http);
 var path = require ('path');
 var port = process.env.PORT || 8000; // connection heroku
 
+
+app.use(express.static(path.join(__dirname, '/socket-client/build')));
+
 /**
  * variables globales
  */
@@ -118,10 +121,7 @@ function gameOver(player) {
 }
 
 
-app.use(express.static(path.join(__dirname, 'public')));
- app.get('/', function(req, res){
-  res.sendFile(__dirname + '/socket-client/public/index.html');
-});
+
 
  io.on('connection', function (socket) {
   console.log('user connected ', socket.id);
