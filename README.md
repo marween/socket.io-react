@@ -19,6 +19,7 @@ According the rules of the exercise the server-side technologies were mandatory.
 You will need [node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/) installed on your computer.
 
 **To play localy**
+
 Run npm install
 
 In *servers.js* (root) replace
