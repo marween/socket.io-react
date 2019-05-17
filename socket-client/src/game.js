@@ -245,21 +245,22 @@ render(){
     <div 
     className="col align-self-center" 
     id="mainboard">
-    <h1 className='title'> 
-      {this.props.playerOne} vs {this.props.playerTwo}
-    </h1>    
-    <div id="checker-board">
-    {Object.keys(this.state.board).map(key => {
-      let square = this.state.board[key];
-      return (
-        <div 
-        className={`square ${square.color}${square.highlighted ? ' highlighted' : ''}`} 
-        id={square.id} 
-        key={square.id} 
-        onClick={this.handleClick.bind(this)}>{square.content}
-        </div>
-        )})}
-    </div>
+      <h1 className='title'> 
+        {this.props.playerOne} vs {this.props.playerTwo}
+      </h1>    
+      <div id="checker-board">
+        {Object.keys(this.state.board).map(key => {
+          let square = this.state.board[key];
+          return (
+            <div 
+            className={`square ${square.color}${square.highlighted ? ' highlighted' : ''}`} 
+            id={square.id} 
+            key={square.id} 
+            onClick={this.handleClick.bind(this)}>{square.content}
+            </div>
+          )}
+        )}
+      </div>
     </div>
 
     </>
