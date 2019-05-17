@@ -231,16 +231,17 @@ class Game extends Component{
         this.setState({mandatory: []});
         this.setState({selected: ''});
       });
-      /*socket.on('gameOver', data =>{
-        
-      })*/
+
+      this.socket.on('gameOver', data =>{
+        console.log(data);
+      })
+
 
 //-------------------------------------------------------------
 }
 render(){
   // console.log(this.state.board)
   return (
-
     <>        
     <div 
     className="col align-self-center" 
@@ -262,7 +263,6 @@ render(){
         )}
       </div>
     </div>
-
     </>
     );
   }
