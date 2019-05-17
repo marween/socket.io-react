@@ -240,17 +240,15 @@ class Game extends Component{
 render(){
   // console.log(this.state.board)
   return (
-
     <>        
     <div 
-    className="col align-self-center" 
-    id="mainboard">
+      className="col align-self-center" 
+      id="mainboard">
     <h1 className='title'> 
       Mon jeu de dames 
     </h1>
     <p className="vs">
      {this.props.playerOne} vs {this.props.playerTwo}</p>
-    
     <div id="checker-board">
     {Object.keys(this.state.board).map(key => {
       let square = this.state.board[key];
@@ -263,8 +261,7 @@ render(){
         </div>
         )})}
     </div>
-    </div>
-
+    </div> 
     </>
     );
   }

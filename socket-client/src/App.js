@@ -47,6 +47,7 @@ class Chat extends Component{
   }
 
   joinRoom(roomName){
+    console.log('roomName', roomName)
     socket.emit('joinRoom', {roomName: roomName, user: this.state.username})
     if (!this.state.room) {this.setState({room_check: true})};
   }
@@ -76,6 +77,7 @@ class Chat extends Component{
     });
     
     socket.on('room-service',(data) => {
+      console.log('room_service', data)
       this.setState({room: data[0], playerOne: data[1], playerTwo: data[2]});
     });
 
@@ -84,17 +86,17 @@ class Chat extends Component{
     })
 
     socket.on('room-list', (data) => {
+      console.log('room-list', data);
       this.setState({rooms: data});
       console.log("state room : ", this.state.rooms);
     })
 
   }
   render(){
-    // console.log(this.state);
+  
     console.log('playerone ' + this.state.playerOne)
 
     return (
-
       <> 
         { this.state.session ?
           <div>
@@ -105,9 +107,7 @@ class Chat extends Component{
                   {this.state.rooms.map(item => {
                     return (
                       <div>{item}
-                      <button onClick={()=>this.joinRoom(item)}>Join room</button> 
-                      
-
+                        <button onClick={()=>this.joinRoom(item)}>Join room</button> 
                       </div>
                     )}
                   )}

@@ -8,11 +8,8 @@ var port = process.env.PORT || 8000; // connection heroku
 /**
  * variables globales
  */
- let roomArray=[]
- let usersList = [];
- let playerOne ='';
- let playerTwo = '';
-
+let roomArray=[];
+let usersList = [];
 let board = new Array(8);
 
 for(let i = 0; i < 8; i++){
@@ -33,7 +30,6 @@ for(let i = 0; i < 8; i++){
     board[i][j] = '';
   }
 }
-
 let colNames= ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 let turn = 'white';
 let plusieurs_prises = [];
@@ -41,7 +37,6 @@ let plusieurs_prises = [];
 * fonctions jeu des dames----------------------------------
 *-----------------------------------------------------------
 */
-
 function verifpiece(data) {
   let column_origin = colNames.indexOf(data.playerMove.substring(0, 1));
   let row_origin = data.playerMove.substring(1, 2) - 1;
@@ -49,7 +44,6 @@ function verifpiece(data) {
     return true;
   return false;
 }
-
 function possibleMoves(row, column, color, isQueen) {
 
   let legalMove = [];
@@ -132,8 +126,7 @@ app.use(express.static(path.join(__dirname, 'public')));
   console.log(board[1][1]);
   var loggedUser; // Utilisateur connecté a la socket
   let roomID;
-  let playerNumber = false;
-  
+  let playerNumber = false;  
   /**
    * Connexion d'un utilisateur via le formulaire :
    *  - sauvegarde du user
@@ -147,7 +140,8 @@ app.use(express.static(path.join(__dirname, 'public')));
     
     socket.to(roomID).broadcast.emit('chat-message', message);
     
-    io.emit('room-list', roomArray)
+    console.log('on_login', roomArray)
+    io.emit('room-list', roomArray.map(r => r.id));
   });
    /**
    * Réception de l'événement 'room-service' et 'move' 
@@ -155,20 +149,23 @@ app.use(express.static(path.join(__dirname, 'public')));
    */
    socket.on('createRoom', function(data){
     socket.leave(roomID); // on quitte une room
-    playerOne = data.user; // premier connecté = premier joueur
     roomID = data.roomName; // nom de la room
-    //console.log('[socket]','join room :',roomID);
-    socket.join(roomID);
-
-    if(roomArray.indexOf(roomID) === -1){roomArray.push(roomID)}; // compte le nombre de joueurs à la room
-    //console.log('array check', roomArray)
-    // console.log('playerNumber before change',playerNumber)
-    playerNumber =true;
     
-    socket.emit('room-service', [roomID, playerOne, playerTwo]);
+    socket.join(roomID);
+    let room ={
+      id:roomID,
+      player1: data.user,
+      player2:''
+    }
+    if(roomArray.indexOf(roomID) === -1){roomArray.push(room)}; // compte le nombre de joueurs à la room
+    playerNumber =true;
+    console.log('room update', room);
+    socket.emit('room-service', [room.id, room.player1, room.player2]);
     
     socket.emit('playerNumber', playerNumber);
-    console.log('player',playerNumber)
+    console.log('on_login', roomArray)
+    io.emit('room-list', roomArray.map(r => r.id));
+    // console.log('player',playerNumber)
 
     // jeu de dame -> mouvement
     socket.on('move', function(data){
@@ -225,30 +222,33 @@ app.use(express.static(path.join(__dirname, 'public')));
     })
    
   });
-
   /**
    * Réception de l'événement 'joinRoom-service' et 'move' 
    * et réémission vers tous les utilisateurs connectés à la room
    */
    socket.on('joinRoom', function(data){
+    console.log(data);
     // joueur qui rejoint la room = joueur 2
-    playerTwo = data.user;
-      // console.log('joinRoom', data, playerOne, playerTwo)
     socket.leave(roomID);
     roomID = data.roomName;
-    // console.log(roomID)
     socket.join(roomID)
     
-    io.emit('room-service', [roomID, playerOne, playerTwo]);
+    let room = roomArray.find(r => r.id == roomID);
+    console.log(room)
     
+    room.player2 = data.user;
+    console.log('room update2', room);
+    io.emit('room-service', [room.id, room.player1, room.player2]);
     socket.emit('playerNumber', playerNumber)
-    console.log('player',playerNumber)
-    
+
     clientsInRoom = io.nsps['/'].adapter.rooms[roomID].length;
     if(clientsInRoom === 2){ 
       roomArray.splice(roomArray.indexOf(roomID),1)
-      //console.log('room complet')
+      
+      console.log('on_login', roomArray)
+      io.emit('room-list', roomArray.map(r => r.id));
     }
+    
 
     // jeu de dame -> mouvement joueur 2
     socket.on('move', function(data){
@@ -328,7 +328,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
     }
     socket.leave(data.roomName);
-    io.emit('room-list', roomArray)
+    console.log('on_login', roomArray)
+    io.emit('room-list', roomArray.map(r=>r.id));
 
   })
 
@@ -336,8 +337,6 @@ app.use(express.static(path.join(__dirname, 'public')));
    * Réception de l'événement 'chat-message' et réémission vers tous les utilisateurs
    */
    socket.on('chat-message', function (message) {
-    //console.log('chat-message', message);
-    //console.log('roomID', roomID);
     message.username = loggedUser.username + " says : ";
     io.to(roomID).emit('chat-message', message);
 
