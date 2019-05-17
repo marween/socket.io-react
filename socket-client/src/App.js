@@ -14,7 +14,7 @@ class Chat extends Component{
     this.joinRoom = this.joinRoom.bind(this);
     
     this.state = {
-      endpoint: "localhost:8000",
+      
       username: '',
       message:'', //sert à communiquer avec le serveur
       messages: [], //ensemble des messages reçus du serveur
@@ -26,7 +26,7 @@ class Chat extends Component{
       playerTwo:'', 
       playerNumber: ''
     };
-    socket = io(this.state.endpoint);
+    socket = io();
   }  
 
   login(event) {
