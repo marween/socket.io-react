@@ -47,7 +47,9 @@ In the root:
 * Insert your name then create or join a room
 * ...
 * Play!
+## Demo
 
+[See demo on Heroku](https://onepiececheckers.herokuapp.com/)
 * * *
 
 May 2019, Jonathan Blavier Anne-Magali Saint-Georges.
